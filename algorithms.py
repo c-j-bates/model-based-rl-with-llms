@@ -128,7 +128,7 @@ class Agent:
         self.query_lm = lambda prompt: chat(prompt.to_messages()).content
         self.episode_length = episode_length
 
-    def enumerative_search(self, max_depth=6):
+    def enumerative_search(self, max_depth=8):
         """
         Search for win state according to specified algorithm cutting off at
         max_depth
@@ -166,7 +166,6 @@ class Agent:
             return actions, won
         else:
             NotImplementedError()
-        return None
 
     def do_revise_model(self, eps=1.0):
         """
@@ -194,28 +193,51 @@ class Agent:
         """
         Highlight the changes in state resulting from last action
         """
+        def _stringify(x, k=2):
+            if hasattr(x, '__len__'):
+                # Add ellipsis for entries of x beyond length k
+                if len(x) > k:
+                    return str(sorted(x[:k]))[:-1] + '...'
+                else:
+                    return str(sorted(x))
+            else:
+                return str(x)
+
         if len(self.observations) < 2:
             return ''
 
         string = ''
-        for key, val in self.observations[-1].items():
-            val0 = self.observations[-2][key]
+        # Get set of unique keys between from last two steps
+        all_keys = set(self.observations[-1].keys()).union(
+            set(self.observations[-2].keys())
+        )
+        for key in all_keys:
+            val0 = self.observations[-2].get(key)
+            val = self.observations[-1].get(key)
             if not self._eq(val, val0):
-                if not hasattr(val, '__len__') or len(val) <= 2:
-                    # If list of coords is short, just print both in full
-                    string += f'"{key}": {sorted(val0)} --> {sorted(val)}\n'
-                else:
-                    # Otherwise, state what was added or removed
+                cond1 = (hasattr(val, '__len__') and len(val) > 2)
+                cond2 = (hasattr(val0, '__len__') and len(val0) > 2)
+                if cond1 or cond2:
+                    # For long lists of coordinates, summarize by stating what
+                    # was added or removed
                     added = []
                     removed = []
-                    for x in val:
-                        if x not in val0:
-                            added.append(x)
-                    for x in val0:
-                        if x not in val:
-                            removed.append(x)
+                    if not hasattr(val, '__len__'):
+                        added.append(val)
+                    else:
+                        for x in val:
+                            if x not in val0:
+                                added.append(x)
+                    if not hasattr(val0, '__len__'):
+                        removed.append(val0)
+                    else:
+                        for x in val0:
+                            if x not in val:
+                                removed.append(x)
                     string += f'"{key}": Added: {added}\n'
                     string += f'"{key}": Removed: {removed}\n'
+                else:
+                    string += f'"{key}": {_stringify(val0)} --> {_stringify(val)}\n'
         return string
 
     def _call_model_debug(self, state, action, max_retries=5):
@@ -270,7 +292,7 @@ class Agent:
             return 'Exception: No code found inside Python tags.'
 
     def _call_planner_debug(self, state, max_retries=5):
-        locals()['model'] = self.model  # Make world model callable inside planner with 'model(...'
+        # locals()['model'] = self.model  # Make world model callable inside planner with 'model(...'
         for i in range(max_retries):
             try:
                 import _planner_tmp
@@ -279,8 +301,10 @@ class Agent:
                 import _model_tmp  # Planner might use model, so import
                 importlib.reload(_model_tmp)
                 from _model_tmp import model
-                pred = planner(state)
-                return pred
+                action = planner(state)
+                if not hasattr(action, '__len__'):
+                    action = [action]
+                return action
             except Exception as e:
                 prompt = self._make_langchain_prompt(
                     self.create_planner_prompt + self.debug_planner_prompt,
@@ -334,30 +358,52 @@ class Agent:
             return x == y
 
     def _get_pred_errors(self):
+
+        def _stringify(x, k=2):
+            if hasattr(x, '__len__'):
+                # Add ellipsis for entries of x beyond length k
+                if len(x) > k:
+                    return str(sorted(x[:k]))[:-1] + '...'
+                else:
+                    return str(sorted(x))
+            else:
+                return str(x)
+
         if not self.predictions or not self.predictions[-1]:
             return 'None'
 
+        all_keys = set(self.observations[-1].keys()).union(
+            set(self.predictions[-1].keys())
+        )
         string = ""
-        for key, val in self.observations[-1].items():
+        for key in all_keys:
+            val = self.observations[-1].get(key)
             pred = self.predictions[-1].get(key)
             if not self._eq(val, pred):
-                if not hasattr(val, '__len__') or len(val) <= 2:
-                    # If list of coords is short, just print both in full
-                    string += f'"{key}": predicted: {sorted(pred)}\n'
-                    string += f'"{key}": actual: {sorted(val)}\n'
-                else:
-                    # Otherwise, state what was missing or extraneous
+                cond1 = hasattr(val, '__len__') and len(val) > 2
+                cond2 = hasattr(pred, '__len__') and len(pred) > 2
+                if cond1 or cond2:
+                    # If lists are long, only state what was missing or extraneous
                     missing = []
                     extra = []
-                    for x in val:
-                        if x not in pred:
-                            missing.append(x)
-                    for x in pred:
-                        if x not in val:
-                            extra.append(x)
+                    if not hasattr(val, '__len__'):
+                        missing.append(val)
+                    else:
+                        for x in val:
+                            if x not in pred:
+                                missing.append(x)
+                    if not hasattr(pred, '__len__'):
+                        extra.append(pred)
+                    else:
+                        for x in pred:
+                            if x not in val:
+                                extra.append(x)
                     string += f'"{key}": Missing: {missing}\n'
                     string += f'"{key}": extraneous: {extra}\n'
-                # string += f'"{key}" predicted: {sorted(pred)}\n"{key}" actual: {sorted(val)}\n'
+                else:
+                    # If list of coords is short, just print both in full
+                    string += f'"{key}": predicted: {_stringify(pred)}\n'
+                    string += f'"{key}": actual: {_stringify(val)}\n'
         return string
 
     def _get_abbreviated_observations(self, obs, cutoff=3):
@@ -443,8 +489,7 @@ class Agent:
         print(resp)
 
         actions = self._call_planner_debug(self.observations[-1])
-        from ipdb import set_trace; set_trace()
-        if not action:
+        if not actions:
             return self._random_explore()
         return actions
 
@@ -489,8 +534,8 @@ class Agent:
         self.reset(keep_model=keep_model)
 
         # Keep track of consecutive losses and break perseverative loops
-        consecutive_losses = 0
-        losing_actions = []
+        # consecutive_losses = 0
+        # losing_actions = []
 
         for i in range(self.episode_length):
             if self.model is None:
@@ -500,42 +545,61 @@ class Agent:
                 actions, win_predicted = self.enumerative_search()
                 if not actions or not win_predicted:
                     actions = self._directed_explore()
+
+            # Take the sampled action and update engine
             self.step_env(actions.pop(0))
+
+            # Exit if agent won
             if self.engine.won:
                 print('WON THE GAME!!!')
                 break
+
             if self.do_revise_model():
-                queue = losing_actions[-consecutive_losses:]
-                streak = sum(
-                    1 for action in reversed(queue) if action == queue[-1]
-                ) if queue else 0
-                if consecutive_losses > 1 and streak > 1:
-                    # Agent has perseverated, so draw random action
-                    print('PERSEVERATION')
-                    actions = [
-                        random.choice(
-                            list(set(self.actions_set) - set(losing_actions[-1]))
-                        )
-                    ]
-                else:
-                    self._revise_world_model()
-                actions, win_predicted = self.enumerative_search()
-                if not win_predicted:
-                    actions = self._directed_explore()
+                self._revise_world_model()
+
+            # Reset things if agent lost
             if self.engine.lost:
                 print('LOST THE GAME :(((')
-                consecutive_losses += 1
-                losing_actions.append(self.actions[-1])
+                # consecutive_losses += 1
+                # losing_actions.append(self.actions[-1])
                 self.reset(keep_model=True)
-            else:
-                consecutive_losses = 0
-                losing_actions = []
+            # else:
+            #     consecutive_losses = 0
+            #     losing_actions = []
+
+            # if self.do_revise_model():
+            #     queue = losing_actions[-consecutive_losses:]
+            #     streak = sum(
+            #         1 for action in reversed(queue) if action == queue[-1]
+            #     ) if queue else 0
+            #     if consecutive_losses > 1 and streak > 1:
+            #         # Agent has perseverated, so draw random action
+            #         print('PERSEVERATION')
+            #         actions = [
+            #             random.choice(
+            #                 list(set(self.actions_set) - set(losing_actions[-1]))
+            #             )
+            #         ]
+            #     else:
+            #         self._revise_world_model()
+            #     actions, win_predicted = self.enumerative_search()
+            #     if not win_predicted:
+            #         actions = self._directed_explore()
 
 
 if __name__ == '__main__':
-    # engine = LavaGrid()
-    agent = Agent()
-    # engine = BabaIsYou(level_set='demo_LEVELS', level_id=0)
-    # agent.run(engine)
-    engine = BabaIsYou(level_set='demo_LEVELS', level_id=1)
-    agent.run(engine)
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--game', type=str, default='baba')
+    parser.add_argument('--levels', type=str, default="[('demo_LEVELS', 0)]")
+    args = parser.parse_args()
+
+    levels = eval(args.levels)
+
+    for level_set, level_id in levels:
+        if args.game == 'baba':
+            engine = BabaIsYou(level_set=level_set, level_id=level_id)
+        elif args.game == 'lava':
+            engine = LavaGrid()
+        agent = Agent()
+        agent.run(engine)

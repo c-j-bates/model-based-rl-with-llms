@@ -173,7 +173,7 @@ class BabaIsYou:
 
 
 class LavaGrid:
-    def __init__(self, bounds=((0, 4), (0, 4)), avatar_init=(0, 0), goal=(4, 4)):
+    def __init__(self, bounds=((0, 4), (0, 4)), avatar_init=(0, 0), goal=(2, 2)):
         self.bounds = bounds
         self.avatar_init = avatar_init
         self.goal = goal
@@ -226,13 +226,13 @@ class LavaGrid:
         if self.lost:
             return False
         if action == 'up':
-            state['avatar'][1] += 1
+            state['avatar'] = (state['avatar'][0], state['avatar'][1] + 1)
         if action == 'down':
-            state['avatar'][1] -= 1
+            state['avatar'] = (state['avatar'][0], state['avatar'][1] - 1)
         if action == 'left':
-            state['avatar'][0] -= 1
+            state['avatar'] = (state['avatar'][0] - 1, state['avatar'][1])
         if action == 'right':
-            state['avatar'][0] += 1
+            state['avatar'] = (state['avatar'][0] + 1, state['avatar'][1])
         (x, y) = state['avatar']
         in_bounds_x = self.bounds[0][0] <= x <= self.bounds[0][1]
         in_bounds_y = self.bounds[1][0] <= y <= self.bounds[1][1]
