@@ -1,0 +1,490 @@
+[
+    {
+        "planner_prompt": "You are a model-based, RL-style agent. At each step, you choose an action to take in order to maximize\ncumulative reward. In order to do that with a small number of samples, you need to also learn an explicit\nmodel of the domain, which allows you to predict changes in state given your actions. By iteratively\nimproving your world model, you will be able to make better and better plans to maximize reward.\n\nThe 'state' argument will be of the form:\n\\{\n    <object 1>: [(x, y)],  # some object class and its location\n    <object 2>: [(x, y), ...],  # some other object class and its locations\n    ...  # etc.\n    'lost': <bool>,  # Whether game has been lost yet\n    'won': <bool>,  # Whether game has been won yet\n\\}\n\nThe set of possible actions:\n['up', 'down', 'left', 'right']\n\nWORLD MODEL:\n```python\nclass BorderBabaWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BorderBabaWordInteractionRule('border', 'baba_word'))\nclass BorderEmptyInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BorderEmptyInteractionRule('border', 'empty'))\nclass BorderIsWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BorderIsWordInteractionRule('border', 'is_word'))\nclass BorderBabaObjInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BorderBabaObjInteractionRule('border', 'baba_obj'))\nclass BorderYouWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BorderYouWordInteractionRule('border', 'you_word'))\nclass BorderFlagWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BorderFlagWordInteractionRule('border', 'flag_word'))\nclass BorderFlagObjInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BorderFlagObjInteractionRule('border', 'flag_obj'))\nclass BorderWinWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BorderWinWordInteractionRule('border', 'win_word'))\nclass BorderWonInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BorderWonInteractionRule('border', 'won'))\nclass BorderLostInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BorderLostInteractionRule('border', 'lost'))\nclass BabaWordEmptyInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BabaWordEmptyInteractionRule('baba_word', 'empty'))\nclass BabaWordIsWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BabaWordIsWordInteractionRule('baba_word', 'is_word'))\nclass BabaWordBabaObjInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        from itertools import product\n        from copy import deepcopy\n        new_state = deepcopy(state)\n        for coord1, coord2 in product(state[self.entity_key1], state[self.entity_key2]):\n            updates = push(new_state, action, {'name': self.entity_key1, 'coord': coord1}, {'name': self.entity_key2, 'coord': coord2})\n            for key, val in updates.items():\n                new_state[key] = val\n        return new_state\n\ninteraction_rules.append(BabaWordBabaObjInteractionRule('baba_word', 'baba_obj'))\nclass BabaWordYouWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BabaWordYouWordInteractionRule('baba_word', 'you_word'))\nclass BabaWordFlagWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BabaWordFlagWordInteractionRule('baba_word', 'flag_word'))\nclass BabaWordFlagObjInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BabaWordFlagObjInteractionRule('baba_word', 'flag_obj'))\nclass BabaWordWinWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BabaWordWinWordInteractionRule('baba_word', 'win_word'))\nclass BabaWordWonInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BabaWordWonInteractionRule('baba_word', 'won'))\nclass BabaWordLostInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BabaWordLostInteractionRule('baba_word', 'lost'))\nclass EmptyIsWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(EmptyIsWordInteractionRule('empty', 'is_word'))\nclass EmptyBabaObjInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        from itertools import product\n        from copy import deepcopy\n        from predicates import is_adjacent, is_unoccupied\n        new_empty = deepcopy(state[self.entity_key1])\n        new_baba_obj = deepcopy(state[self.entity_key2])\n        delta = get_delta(action)\n        for coord in state[self.entity_key2]:\n            target_coord = (coord[0] + delta[0], coord[1] + delta[1])\n            if is_unoccupied(state, target_coord):\n                new_baba_obj.remove(coord)\n                new_baba_obj.append(target_coord)\n                new_empty.remove(target_coord)\n        return {self.entity_key1: new_empty, self.entity_key2: new_baba_obj}\n\ninteraction_rules.append(EmptyBabaObjInteractionRule('empty', 'baba_obj'))\nclass EmptyYouWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(EmptyYouWordInteractionRule('empty', 'you_word'))\nclass EmptyFlagWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(EmptyFlagWordInteractionRule('empty', 'flag_word'))\nclass EmptyFlagObjInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(EmptyFlagObjInteractionRule('empty', 'flag_obj'))\nclass EmptyWinWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(EmptyWinWordInteractionRule('empty', 'win_word'))\nclass EmptyWonInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(EmptyWonInteractionRule('empty', 'won'))\nclass EmptyLostInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(EmptyLostInteractionRule('empty', 'lost'))\nclass IsWordBabaObjInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        from itertools import product\n        from copy import deepcopy\n        new_state = deepcopy(state)\n        for coord1, coord2 in product(state[self.entity_key1], state[self.entity_key2]):\n            updates = push(new_state, action, {'name': self.entity_key1, 'coord': coord1}, {'name': self.entity_key2, 'coord': coord2})\n            for key, val in updates.items():\n                new_state[key] = val\n        return new_state\n\ninteraction_rules.append(IsWordBabaObjInteractionRule('is_word', 'baba_obj'))\nclass IsWordYouWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(IsWordYouWordInteractionRule('is_word', 'you_word'))\nclass IsWordFlagWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(IsWordFlagWordInteractionRule('is_word', 'flag_word'))\nclass IsWordFlagObjInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(IsWordFlagObjInteractionRule('is_word', 'flag_obj'))\nclass IsWordWinWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(IsWordWinWordInteractionRule('is_word', 'win_word'))\nclass IsWordWonInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(IsWordWonInteractionRule('is_word', 'won'))\nclass IsWordLostInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(IsWordLostInteractionRule('is_word', 'lost'))\nclass BabaObjYouWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        from itertools import product\n        from copy import deepcopy\n        new_state = deepcopy(state)\n        for coord1, coord2 in product(state[self.entity_key1], state[self.entity_key2]):\n            updates = push(new_state, action, {'name': self.entity_key1, 'coord': coord1}, {'name': self.entity_key2, 'coord': coord2})\n            for key, val in updates.items():\n                new_state[key] = val\n        return new_state\n\ninteraction_rules.append(BabaObjYouWordInteractionRule('baba_obj', 'you_word'))\nclass BabaObjFlagWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        from itertools import product\n        from copy import deepcopy\n        new_state = deepcopy(state)\n        for coord1, coord2 in product(state[self.entity_key1], state[self.entity_key2]):\n            updates = push(new_state, action, {'name': self.entity_key1, 'coord': coord1}, {'name': self.entity_key2, 'coord': coord2})\n            for key, val in updates.items():\n                new_state[key] = val\n        return new_state\n\ninteraction_rules.append(BabaObjFlagWordInteractionRule('baba_obj', 'flag_word'))\nclass BabaObjFlagObjInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        from itertools import product\n        from copy import deepcopy\n        from predicates import check_rule, is_unoccupied\n        new_state = deepcopy(state)\n        flag_is_win = check_rule(state, ['flag_word', 'is_word', 'win_word'])\n        for coord1, coord2 in product(state[self.entity_key1], state[self.entity_key2]):\n            if flag_is_win:\n                delta = get_delta(action)\n                new_coord1 = (coord1[0] + delta[0], coord1[1] + delta[1])\n                new_state['baba_obj'].remove(coord1)\n                new_state['baba_obj'].append(new_coord1)\n            else:\n                updates = push(new_state, action, {'name': self.entity_key1, 'coord': coord1}, {'name': self.entity_key2, 'coord': coord2})\n                for key, val in updates.items():\n                    new_state[key] = val\n        return new_state\n\ninteraction_rules.append(BabaObjFlagObjInteractionRule('baba_obj', 'flag_obj'))\nclass BabaObjWinWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        from itertools import product\n        from copy import deepcopy\n        new_state = deepcopy(state)\n        for coord1, coord2 in product(state[self.entity_key1], state[self.entity_key2]):\n            updates = push(new_state, action, {'name': self.entity_key1, 'coord': coord1}, {'name': self.entity_key2, 'coord': coord2})\n            for key, val in updates.items():\n                new_state[key] = val\n        return new_state\n\ninteraction_rules.append(BabaObjWinWordInteractionRule('baba_obj', 'win_word'))\nclass BabaObjWonInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BabaObjWonInteractionRule('baba_obj', 'won'))\nclass BabaObjLostInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BabaObjLostInteractionRule('baba_obj', 'lost'))\nclass YouWordFlagWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(YouWordFlagWordInteractionRule('you_word', 'flag_word'))\nclass YouWordFlagObjInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(YouWordFlagObjInteractionRule('you_word', 'flag_obj'))\nclass YouWordWinWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(YouWordWinWordInteractionRule('you_word', 'win_word'))\nclass YouWordWonInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(YouWordWonInteractionRule('you_word', 'won'))\nclass YouWordLostInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(YouWordLostInteractionRule('you_word', 'lost'))\nclass FlagWordFlagObjInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(FlagWordFlagObjInteractionRule('flag_word', 'flag_obj'))\nclass FlagWordWinWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(FlagWordWinWordInteractionRule('flag_word', 'win_word'))\nclass FlagWordWonInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(FlagWordWonInteractionRule('flag_word', 'won'))\nclass FlagWordLostInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(FlagWordLostInteractionRule('flag_word', 'lost'))\nclass FlagObjWinWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(FlagObjWinWordInteractionRule('flag_obj', 'win_word'))\nclass FlagObjWonInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(FlagObjWonInteractionRule('flag_obj', 'won'))\nclass FlagObjLostInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(FlagObjLostInteractionRule('flag_obj', 'lost'))\nclass WinWordWonInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(WinWordWonInteractionRule('win_word', 'won'))\nclass WinWordLostInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(WinWordLostInteractionRule('win_word', 'lost'))\nclass WonLostInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(WonLostInteractionRule('won', 'lost'))\nclass BabaObjIsWordInteractionRule(BaseInteractionRule):\n    pass\n\ninteraction_rules.append(BabaObjIsWordInteractionRule('baba_obj', 'is_word'))\n\n\n# PREDICATES\ndef check_rule(state, words):\n    # Check that a rule is formed\n    same_row = state[words[0]][0][1] == state[words[1]][0][1] == state[words[2]][0][1]\n    same_col = state[words[0]][0][0] == state[words[1]][0][0] == state[words[2]][0][0]\n    if same_row or same_col:\n        return True\n    return False\n\n\ndef is_adjacent(x, y):\n    # Check if two coordinates are adjacent\n    if (abs(x[0] - y[0]) == 1 and abs(x[1] - y[1]) == 0) or (abs(x[0] - y[0]) == 0 and abs(x[1] - y[1]) == 1):\n        return True\n    return False\n\n\ndef overlapping(entity1_coord, entity2_coord):\n    if entity1_coord == entity2_coord:\n        return True\n    return False\n\n\ndef is_moveable(state, entity_name):\n    # TODO: How to implement this? Maybe write a lookup function that considers all active rules?\n    return True\n\n\ndef is_unoccupied(state, coord):\n    if coord in state['empty']:\n        return True\n    return False\n\n\ndef level_cleared(state):\n    # Check that baba_obj is on top of flag_obj and flag is win\n    if overlapping(state['baba_obj'][0], state['flag_obj'][0]) and check_rule(state, ['flag_word', 'is_word', 'win_word']):\n        return True\n    return False\n\n\n# OPERATORS\n# (High-level operators for constructing plans)\nfrom copy import deepcopy\nfrom planners import low_level_planner\nfrom predicates import check_rule\n\nlogger = []  # Stack for logging planner failures\n\n\ndef move_to(state, entity_name, token_idx, goal_coord):\n    # Move token of entity_name to goal_coord\n    initial_coord = state[entity_name][token_idx]\n    if initial_coord == goal_coord:\n        logger.append({{'operator': 'move_to', 'message': 'Already at goal_coord'}})\n        return [], state\n\n    # Define goal as a predicate\n    goal_cond = lambda state_, name, init_coord, goal_coord: goal_coord in state_[name] and init_coord not in state_[name]\n\n    # Use world model to search exhaustively over action sequences to reach goal\n    actions, new_state = low_level_planner(state, goal_cond, entity_name, initial_coord, goal_coord)\n\n    if goal_cond(new_state, entity_name, initial_coord, goal_coord):\n        message = 'Success'\n    else:\n        message = 'Failure'\n    logger.append({{'operator': 'move_to', 'message': message}})\n\n    return actions, new_state\n\ndef push_to(state, patient_name, token_idx, goal_coord):\n    initial_coord = state[patient_name][token_idx]  # Get the specific token of patient_name\n    controlled_entities = state.get('controlled', [])\n    if initial_coord == goal_coord:\n        logger.append({{'operator': 'push_to', 'message': 'Already at goal_coord'}})\n        return [], state\n\n    if patient_name in controlled_entities:\n        logger.append({{'operator': 'push_to', 'message': 'Can only push non-controlled entities'}})\n        return [], state\n\n    # Define goal as a predicate\n    goal_cond = lambda state_, name, init_coord, goal_coord: goal_coord in state_[name] and init_coord not in state_[name]\n\n    # Use world model to search exhaustively over action sequences to reach goal\n    actions, new_state = low_level_planner(state, goal_cond, patient_name, initial_coord, goal_coord)\n\n    if goal_cond(new_state, patient_name, initial_coord, goal_coord):\n        message = 'Success'\n    else:\n        message = 'Failure'\n    logger.append({{'operator': 'push_to', 'message': message}})\n    return actions, new_state\n\ndef form_rule(state, rule_words, start_coord, orientation):\n    if check_rule(state, rule_words):\n        logger.append({{'operator': 'form_rule', 'message': 'Rule already formed'}})\n        return [], state\n\n    final_coords = [start_coord]\n    if orientation == 'horizontal':\n        # Line the words up horizontally\n        for word in rule_words[1:]:\n            final_coords.append((final_coords[-1][0] + 1, final_coords[-1][1]))\n    else:\n        for word in rule_words[1:]:\n            final_coords.append((final_coords[-1][0], final_coords[-1][1] + 1))\n        # Line the words up vertically\n\n    actions = []\n    new_state = deepcopy(state)\n    # Push each word in turn to its final coordinate\n    for word, coord in zip(rule_words, final_coords):\n        # Iterate over tokens of word to find the one that needs the fewest actions to reach goal\n        min_seq_len = float('inf')\n        outcomes = {{}}\n        for token_idx in range(len(new_state[word])):\n            new_actions_, new_state_ = push_to(new_state, word, token_idx, coord)\n            outcomes[token_idx] = [new_actions_, new_state_]  # Store the actions and state for each token\n            if len(new_actions_) < min_seq_len:\n                min_seq_len = len(new_actions_)\n                min_token_idx = token_idx\n        new_actions, new_state = outcomes[min_token_idx]\n        actions.extend(new_actions)\n\n    if check_rule(new_state, rule_words):\n        message = 'Success'\n    else:\n        message = 'Failure'\n    logger.append({{'operator': 'form_rule', 'message': message}})\n    return actions, new_state\n\n```\n\nCURRENT STATE:\n{'border': [(0, 9), (0, 8), (0, 7), (0, 6), (0, 5), (0, 4), (0, 3), (0, 2), (0, 1), (0, 0), (1, 9), (1, 0), (2, 9), (2, 0), (3, 9), (3, 0), (4, 9), (4, 0), (5, 9), (5, 0), (6, 9), (6, 0), (7, 9), (7, 0), (8, 9), (8, 0), (9, 9), (9, 8), (9, 7), (9, 6), (9, 5), (9, 4), (9, 3), (9, 2), (9, 1), (9, 0)], 'baba_word': [(1, 8)], 'empty': [(1, 7), (1, 6), (1, 5), (1, 4), (1, 3), (1, 2), (1, 1), (2, 7), (2, 6), (2, 5), (2, 3), (2, 2), (2, 1), (3, 7), (3, 6), (3, 5), (3, 4), (3, 3), (3, 2), (3, 1), (4, 8), (4, 7), (4, 6), (4, 5), (4, 4), (4, 3), (4, 2), (4, 1), (5, 8), (5, 7), (5, 6), (5, 5), (5, 4), (5, 3), (5, 2), (5, 1), (6, 7), (6, 6), (6, 5), (6, 4), (6, 3), (6, 2), (6, 1), (7, 7), (7, 6), (7, 5), (7, 3), (7, 2), (7, 1), (8, 7), (8, 6), (8, 5), (8, 4), (8, 3), (8, 2), (8, 1)], 'is_word': [(2, 8), (7, 8)], 'baba_obj': [(2, 4)], 'you_word': [(3, 8)], 'flag_word': [(6, 8)], 'flag_obj': [(7, 4)], 'win_word': [(8, 8)], 'won': False, 'lost': False}\n\nGOAL: Win the level\n\nINSTRUCTIONS:\nFirst, express the GOAL as a FOL formula composed of PREDICATES.\nThen, form a high-level plan consisting of a sequence of intermediate steps,\nexpressed in terms of OPERATORS, in order to reach the GOAL. It should look like,\n\n```python\n# Goal\ngoal_state_str = \"predicate(args)\"  # Callable with exec\n# Plan\nactions = []\nnew_actions, new_state = operator1(args1)\nactions.extend(new_actions)\nnew_actions, new_state = operator2(args2)\nactions.extend(new_actions)\n# etc...\n```\n\nIMPORTANT NOTES:\n--Use the *absolute minimum* number of operators that you possibly can!! If your plan only needs one or two operators total, that's fine!\n",
+        "planner_response": "```python\n# Goal\ngoal_state_str = \"level_cleared(state)\"  \n\n# Plan\nactions = []\nnew_actions, new_state = move_to(state, 'baba_obj', 0, (7, 4))\nactions.extend(new_actions)\nnew_actions, new_state = move_to(new_state, 'you_word', 0, (7, 4))\nactions.extend(new_actions)\nnew_actions, new_state = form_rule(new_state, ['flag_word', 'is_word', 'win_word'], (6, 8), 'horizontal')\nactions.extend(new_actions)\n```\nIn this plan, we first move Baba to the flag object, then move \"you\" word to the flag object. Finally, we form a rule \"flag is win\" horizontally. This sequence of actions should help us win the level.",
+        "relevant_rules_prompt": "You are a model-based, RL-style agent. At each step, you choose an action to take in order to maximize\ncumulative reward. In order to do that with a small number of samples, you need to also learn an explicit\nmodel of the domain, which allows you to predict changes in state given your actions. By iteratively\nimproving your world model, you will be able to make better and better plans to maximize reward.\n\nThe 'state' argument will be of the form:\n\\{\n    <object 1>: [(x, y)],  # some object class and its location\n    <object 2>: [(x, y), ...],  # some other object class and its locations\n    ...  # etc.\n    'lost': <bool>,  # Whether game has been lost yet\n    'won': <bool>,  # Whether game has been won yet\n\\}\n\nThe set of possible actions:\n['up', 'down', 'left', 'right']\n\nWORLD MODEL:\n```python\ninteraction_rules = []\n\nclass BaseInteractionRule:\n    def __init__(self, entity_key1, entity_key2):\n        self.entity_key1 = entity_key1  # Field that corresponds to entity class 1\n        self.entity_key2 = entity_key2  # Field that corresponds to entity class 2\n\n    def forward(self, state, action):\n        \"\"\"Method to be overridden. \n\n        Runs forward model to predict new states for entity1 and entity2, specifically.\n        Note the overall state is provided because predictions could be mediated by\n        other dimensions of the overall state.\n\n        Args:\n            state: full state, including all objects\n            action: proposed action\n\n        Returns:\n            dict of predicted states of tokens of entity1 and entity2 after taking action\n        \"\"\"\n        # No-op\n        predictions = {{\n            self.entity_key1: state[self.entity_key1],\n            self.entity_key2: state[self.entity_key2]\n        }}\n        return predictions\n\n\nclass BorderBabaWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BorderBabaWordInteractionRule('border', 'baba_word'))\n\nclass BorderEmptyInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BorderEmptyInteractionRule('border', 'empty'))\n\nclass BorderIsWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BorderIsWordInteractionRule('border', 'is_word'))\n\nclass BorderBabaObjInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BorderBabaObjInteractionRule('border', 'baba_obj'))\n\nclass BorderYouWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BorderYouWordInteractionRule('border', 'you_word'))\n\nclass BorderFlagWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BorderFlagWordInteractionRule('border', 'flag_word'))\n\nclass BorderFlagObjInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BorderFlagObjInteractionRule('border', 'flag_obj'))\n\nclass BorderWinWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BorderWinWordInteractionRule('border', 'win_word'))\n\nclass BorderWonInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BorderWonInteractionRule('border', 'won'))\n\nclass BorderLostInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BorderLostInteractionRule('border', 'lost'))\n\nclass BabaWordEmptyInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BabaWordEmptyInteractionRule('baba_word', 'empty'))\n\nclass BabaWordIsWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BabaWordIsWordInteractionRule('baba_word', 'is_word'))\n\nclass BabaWordBabaObjInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        from itertools import product\n        from copy import deepcopy\n        new_state = deepcopy(state)\n        for coord1, coord2 in product(state[self.entity_key1], state[self.entity_key2]):\n            updates = push(new_state, action, {'name': self.entity_key1, 'coord': coord1}, {'name': self.entity_key2, 'coord': coord2})\n            for key, val in updates.items():\n                new_state[key] = val\n        return new_state\n\ninteraction_rules.append(BabaWordBabaObjInteractionRule('baba_word', 'baba_obj'))\n\nclass BabaWordYouWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BabaWordYouWordInteractionRule('baba_word', 'you_word'))\n\nclass BabaWordFlagWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BabaWordFlagWordInteractionRule('baba_word', 'flag_word'))\n\nclass BabaWordFlagObjInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BabaWordFlagObjInteractionRule('baba_word', 'flag_obj'))\n\nclass BabaWordWinWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BabaWordWinWordInteractionRule('baba_word', 'win_word'))\n\nclass BabaWordWonInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BabaWordWonInteractionRule('baba_word', 'won'))\n\nclass BabaWordLostInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BabaWordLostInteractionRule('baba_word', 'lost'))\n\nclass EmptyIsWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(EmptyIsWordInteractionRule('empty', 'is_word'))\n\nclass EmptyBabaObjInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        from itertools import product\n        from copy import deepcopy\n        from predicates import is_adjacent, is_unoccupied\n        new_empty = deepcopy(state[self.entity_key1])\n        new_baba_obj = deepcopy(state[self.entity_key2])\n        delta = get_delta(action)\n        for coord in state[self.entity_key2]:\n            target_coord = (coord[0] + delta[0], coord[1] + delta[1])\n            if is_unoccupied(state, target_coord):\n                new_baba_obj.remove(coord)\n                new_baba_obj.append(target_coord)\n                new_empty.remove(target_coord)\n        return {self.entity_key1: new_empty, self.entity_key2: new_baba_obj}\n\ninteraction_rules.append(EmptyBabaObjInteractionRule('empty', 'baba_obj'))\n\nclass EmptyYouWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(EmptyYouWordInteractionRule('empty', 'you_word'))\n\nclass EmptyFlagWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(EmptyFlagWordInteractionRule('empty', 'flag_word'))\n\nclass EmptyFlagObjInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(EmptyFlagObjInteractionRule('empty', 'flag_obj'))\n\nclass EmptyWinWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(EmptyWinWordInteractionRule('empty', 'win_word'))\n\nclass EmptyWonInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(EmptyWonInteractionRule('empty', 'won'))\n\nclass EmptyLostInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(EmptyLostInteractionRule('empty', 'lost'))\n\nclass IsWordBabaObjInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        from itertools import product\n        from copy import deepcopy\n        new_state = deepcopy(state)\n        for coord1, coord2 in product(state[self.entity_key1], state[self.entity_key2]):\n            updates = push(new_state, action, {'name': self.entity_key1, 'coord': coord1}, {'name': self.entity_key2, 'coord': coord2})\n            for key, val in updates.items():\n                new_state[key] = val\n        return new_state\n\ninteraction_rules.append(IsWordBabaObjInteractionRule('is_word', 'baba_obj'))\n\nclass IsWordYouWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(IsWordYouWordInteractionRule('is_word', 'you_word'))\n\nclass IsWordFlagWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(IsWordFlagWordInteractionRule('is_word', 'flag_word'))\n\nclass IsWordFlagObjInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(IsWordFlagObjInteractionRule('is_word', 'flag_obj'))\n\nclass IsWordWinWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(IsWordWinWordInteractionRule('is_word', 'win_word'))\n\nclass IsWordWonInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(IsWordWonInteractionRule('is_word', 'won'))\n\nclass IsWordLostInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(IsWordLostInteractionRule('is_word', 'lost'))\n\nclass BabaObjYouWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        from itertools import product\n        from copy import deepcopy\n        new_state = deepcopy(state)\n        for coord1, coord2 in product(state[self.entity_key1], state[self.entity_key2]):\n            updates = push(new_state, action, {'name': self.entity_key1, 'coord': coord1}, {'name': self.entity_key2, 'coord': coord2})\n            for key, val in updates.items():\n                new_state[key] = val\n        return new_state\n\ninteraction_rules.append(BabaObjYouWordInteractionRule('baba_obj', 'you_word'))\n\nclass BabaObjFlagWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        from itertools import product\n        from copy import deepcopy\n        new_state = deepcopy(state)\n        for coord1, coord2 in product(state[self.entity_key1], state[self.entity_key2]):\n            updates = push(new_state, action, {'name': self.entity_key1, 'coord': coord1}, {'name': self.entity_key2, 'coord': coord2})\n            for key, val in updates.items():\n                new_state[key] = val\n        return new_state\n\ninteraction_rules.append(BabaObjFlagWordInteractionRule('baba_obj', 'flag_word'))\n\nclass BabaObjFlagObjInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        from itertools import product\n        from copy import deepcopy\n        from predicates import check_rule, is_unoccupied\n        new_state = deepcopy(state)\n        flag_is_win = check_rule(state, ['flag_word', 'is_word', 'win_word'])\n        for coord1, coord2 in product(state[self.entity_key1], state[self.entity_key2]):\n            if flag_is_win:\n                delta = get_delta(action)\n                new_coord1 = (coord1[0] + delta[0], coord1[1] + delta[1])\n                new_state['baba_obj'].remove(coord1)\n                new_state['baba_obj'].append(new_coord1)\n            else:\n                updates = push(new_state, action, {'name': self.entity_key1, 'coord': coord1}, {'name': self.entity_key2, 'coord': coord2})\n                for key, val in updates.items():\n                    new_state[key] = val\n        return new_state\n\ninteraction_rules.append(BabaObjFlagObjInteractionRule('baba_obj', 'flag_obj'))\n\nclass BabaObjWinWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        from itertools import product\n        from copy import deepcopy\n        new_state = deepcopy(state)\n        for coord1, coord2 in product(state[self.entity_key1], state[self.entity_key2]):\n            updates = push(new_state, action, {'name': self.entity_key1, 'coord': coord1}, {'name': self.entity_key2, 'coord': coord2})\n            for key, val in updates.items():\n                new_state[key] = val\n        return new_state\n\ninteraction_rules.append(BabaObjWinWordInteractionRule('baba_obj', 'win_word'))\n\nclass BabaObjWonInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BabaObjWonInteractionRule('baba_obj', 'won'))\n\nclass BabaObjLostInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BabaObjLostInteractionRule('baba_obj', 'lost'))\n\nclass YouWordFlagWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(YouWordFlagWordInteractionRule('you_word', 'flag_word'))\n\nclass YouWordFlagObjInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(YouWordFlagObjInteractionRule('you_word', 'flag_obj'))\n\nclass YouWordWinWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(YouWordWinWordInteractionRule('you_word', 'win_word'))\n\nclass YouWordWonInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(YouWordWonInteractionRule('you_word', 'won'))\n\nclass YouWordLostInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(YouWordLostInteractionRule('you_word', 'lost'))\n\nclass FlagWordFlagObjInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(FlagWordFlagObjInteractionRule('flag_word', 'flag_obj'))\n\nclass FlagWordWinWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(FlagWordWinWordInteractionRule('flag_word', 'win_word'))\n\nclass FlagWordWonInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(FlagWordWonInteractionRule('flag_word', 'won'))\n\nclass FlagWordLostInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(FlagWordLostInteractionRule('flag_word', 'lost'))\n\nclass FlagObjWinWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(FlagObjWinWordInteractionRule('flag_obj', 'win_word'))\n\nclass FlagObjWonInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(FlagObjWonInteractionRule('flag_obj', 'won'))\n\nclass FlagObjLostInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(FlagObjLostInteractionRule('flag_obj', 'lost'))\n\nclass WinWordWonInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(WinWordWonInteractionRule('win_word', 'won'))\n\nclass WinWordLostInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(WinWordLostInteractionRule('win_word', 'lost'))\n\nclass WonLostInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(WonLostInteractionRule('won', 'lost'))\n\nclass BabaObjIsWordInteractionRule(BaseInteractionRule):\n    pass\n\ninteraction_rules.append(BabaObjIsWordInteractionRule('baba_obj', 'is_word'))\n\n\nclass YouWordBabaObjInteractionRule(BaseInteractionRule):\n    pass\n\ninteraction_rules.append(YouWordBabaObjInteractionRule('you_word', 'baba_obj'))\n\n\nclass FlagWordBabaObjInteractionRule(BaseInteractionRule):\n    pass\n\ninteraction_rules.append(FlagWordBabaObjInteractionRule('flag_word', 'baba_obj'))\n\n\n# PREDICATES\ndef check_rule(state, words):\n    # Check that a rule is formed\n    same_row = state[words[0]][0][1] == state[words[1]][0][1] == state[words[2]][0][1]\n    same_col = state[words[0]][0][0] == state[words[1]][0][0] == state[words[2]][0][0]\n    if same_row or same_col:\n        return True\n    return False\n\n\ndef is_adjacent(x, y):\n    # Check if two coordinates are adjacent\n    if (abs(x[0] - y[0]) == 1 and abs(x[1] - y[1]) == 0) or (abs(x[0] - y[0]) == 0 and abs(x[1] - y[1]) == 1):\n        return True\n    return False\n\n\ndef overlapping(entity1_coord, entity2_coord):\n    if entity1_coord == entity2_coord:\n        return True\n    return False\n\n\ndef is_moveable(state, entity_name):\n    # TODO: How to implement this? Maybe write a lookup function that considers all active rules?\n    return True\n\n\ndef is_unoccupied(state, coord):\n    if coord in state['empty']:\n        return True\n    return False\n\n\ndef level_cleared(state):\n    # Check that baba_obj is on top of flag_obj and flag is win\n    if overlapping(state['baba_obj'][0], state['flag_obj'][0]) and check_rule(state, ['flag_word', 'is_word', 'win_word']):\n        return True\n    return False\n\n\n# OPERATORS\n# (High-level operators for constructing plans)\nfrom copy import deepcopy\nfrom planners import low_level_planner\nfrom predicates import check_rule\n\nlogger = []  # Stack for logging planner failures\n\n\ndef move_to(state, entity_name, token_idx, goal_coord):\n    # Move token of entity_name to goal_coord\n    initial_coord = state[entity_name][token_idx]\n    if initial_coord == goal_coord:\n        logger.append({{'operator': 'move_to', 'message': 'Already at goal_coord'}})\n        return [], state\n\n    # Define goal as a predicate\n    goal_cond = lambda state_, name, init_coord, goal_coord: goal_coord in state_[name] and init_coord not in state_[name]\n\n    # Use world model to search exhaustively over action sequences to reach goal\n    actions, new_state = low_level_planner(state, goal_cond, entity_name, initial_coord, goal_coord)\n\n    if goal_cond(new_state, entity_name, initial_coord, goal_coord):\n        message = 'Success'\n    else:\n        message = 'Failure'\n    logger.append({{'operator': 'move_to', 'message': message}})\n\n    return actions, new_state\n\ndef push_to(state, patient_name, token_idx, goal_coord):\n    initial_coord = state[patient_name][token_idx]  # Get the specific token of patient_name\n    controlled_entities = state.get('controlled', [])\n    if initial_coord == goal_coord:\n        logger.append({{'operator': 'push_to', 'message': 'Already at goal_coord'}})\n        return [], state\n\n    if patient_name in controlled_entities:\n        logger.append({{'operator': 'push_to', 'message': 'Can only push non-controlled entities'}})\n        return [], state\n\n    # Define goal as a predicate\n    goal_cond = lambda state_, name, init_coord, goal_coord: goal_coord in state_[name] and init_coord not in state_[name]\n\n    # Use world model to search exhaustively over action sequences to reach goal\n    actions, new_state = low_level_planner(state, goal_cond, patient_name, initial_coord, goal_coord)\n\n    if goal_cond(new_state, patient_name, initial_coord, goal_coord):\n        message = 'Success'\n    else:\n        message = 'Failure'\n    logger.append({{'operator': 'push_to', 'message': message}})\n    return actions, new_state\n\ndef form_rule(state, rule_words, start_coord, orientation):\n    if check_rule(state, rule_words):\n        logger.append({{'operator': 'form_rule', 'message': 'Rule already formed'}})\n        return [], state\n\n    final_coords = [start_coord]\n    if orientation == 'horizontal':\n        # Line the words up horizontally\n        for word in rule_words[1:]:\n            final_coords.append((final_coords[-1][0] + 1, final_coords[-1][1]))\n    else:\n        for word in rule_words[1:]:\n            final_coords.append((final_coords[-1][0], final_coords[-1][1] + 1))\n        # Line the words up vertically\n\n    actions = []\n    new_state = deepcopy(state)\n    # Push each word in turn to its final coordinate\n    for word, coord in zip(rule_words, final_coords):\n        # Iterate over tokens of word to find the one that needs the fewest actions to reach goal\n        min_seq_len = float('inf')\n        outcomes = {{}}\n        for token_idx in range(len(new_state[word])):\n            new_actions_, new_state_ = push_to(new_state, word, token_idx, coord)\n            outcomes[token_idx] = [new_actions_, new_state_]  # Store the actions and state for each token\n            if len(new_actions_) < min_seq_len:\n                min_seq_len = len(new_actions_)\n                min_token_idx = token_idx\n        new_actions, new_state = outcomes[min_token_idx]\n        actions.extend(new_actions)\n\n    if check_rule(new_state, rule_words):\n        message = 'Success'\n    else:\n        message = 'Failure'\n    logger.append({{'operator': 'form_rule', 'message': message}})\n    return actions, new_state\n\n```\n\nGOAL:\nWin\n\nPLAN:\n\n# Goal\ngoal_state_str = \"level_cleared(state)\"  \n\n# Plan\nactions = []\nnew_actions, new_state = move_to(state, 'baba_obj', 0, (7, 4))\nactions.extend(new_actions)\nnew_actions, new_state = move_to(new_state, 'you_word', 0, (7, 4))\nactions.extend(new_actions)\nnew_actions, new_state = form_rule(new_state, ['flag_word', 'is_word', 'win_word'], (6, 8), 'horizontal')\nactions.extend(new_actions)\n\n\nCURRENT STATE:\n{'border': [(0, 9), (0, 8), (0, 7), (0, 6), (0, 5), (0, 4), (0, 3), (0, 2), (0, 1), (0, 0), (1, 9), (1, 0), (2, 9), (2, 0), (3, 9), (3, 0), (4, 9), (4, 0), (5, 9), (5, 0), (6, 9), (6, 0), (7, 9), (7, 0), (8, 9), (8, 0), (9, 9), (9, 8), (9, 7), (9, 6), (9, 5), (9, 4), (9, 3), (9, 2), (9, 1), (9, 0)], 'baba_word': [(1, 8)], 'empty': [(1, 7), (1, 6), (1, 5), (1, 4), (1, 3), (1, 2), (1, 1), (2, 7), (2, 6), (2, 5), (2, 4), (2, 3), (2, 2), (2, 1), (3, 7), (3, 6), (3, 5), (3, 4), (3, 3), (3, 2), (3, 1), (4, 8), (4, 7), (4, 6), (4, 5), (4, 4), (4, 3), (4, 2), (4, 1), (5, 8), (5, 7), (5, 6), (5, 5), (5, 4), (5, 3), (5, 2), (5, 1), (6, 7), (6, 6), (6, 5), (6, 3), (6, 2), (6, 1), (7, 7), (7, 6), (7, 5), (7, 3), (7, 2), (7, 1), (8, 7), (8, 6), (8, 5), (8, 4), (8, 3), (8, 2), (8, 1)], 'is_word': [(2, 8), (7, 8)], 'you_word': [(3, 8)], 'flag_word': [(6, 8)], 'baba_obj': [(6, 4)], 'flag_obj': [(7, 4)], 'win_word': [(8, 8)], 'won': False, 'lost': False}\n\nACTION:\nright\n\nINSTRUCTIONS:\nOf the interaction rules above, choose a subset that are essential for predicting the next\nstate transition, given the current state. Omit rules that you think\nwill predict no change or a change that is irrelevant for the goal and plan.\n\nYou MUST:\n--List your selected rules like:\n('entity_key1', 'entity_key2')\n('entity_key1', 'entity_key3')\n...\netc.\n--List rules as tuples, i.e. with () not []\n(I will use regular expressions to look for tuples of strings.)\n",
+        "relevant_rules_response": "('baba_word', 'empty')",
+        "action": "right",
+        "observation": {
+            "border": [
+                [
+                    0,
+                    9
+                ],
+                [
+                    0,
+                    8
+                ],
+                [
+                    0,
+                    7
+                ],
+                [
+                    0,
+                    6
+                ],
+                [
+                    0,
+                    5
+                ],
+                [
+                    0,
+                    4
+                ],
+                [
+                    0,
+                    3
+                ],
+                [
+                    0,
+                    2
+                ],
+                [
+                    0,
+                    1
+                ],
+                [
+                    0,
+                    0
+                ],
+                [
+                    1,
+                    9
+                ],
+                [
+                    1,
+                    0
+                ],
+                [
+                    2,
+                    9
+                ],
+                [
+                    2,
+                    0
+                ],
+                [
+                    3,
+                    9
+                ],
+                [
+                    3,
+                    0
+                ],
+                [
+                    4,
+                    9
+                ],
+                [
+                    4,
+                    0
+                ],
+                [
+                    5,
+                    9
+                ],
+                [
+                    5,
+                    0
+                ],
+                [
+                    6,
+                    9
+                ],
+                [
+                    6,
+                    0
+                ],
+                [
+                    7,
+                    9
+                ],
+                [
+                    7,
+                    0
+                ],
+                [
+                    8,
+                    9
+                ],
+                [
+                    8,
+                    0
+                ],
+                [
+                    9,
+                    9
+                ],
+                [
+                    9,
+                    8
+                ],
+                [
+                    9,
+                    7
+                ],
+                [
+                    9,
+                    6
+                ],
+                [
+                    9,
+                    5
+                ],
+                [
+                    9,
+                    4
+                ],
+                [
+                    9,
+                    3
+                ],
+                [
+                    9,
+                    2
+                ],
+                [
+                    9,
+                    1
+                ],
+                [
+                    9,
+                    0
+                ]
+            ],
+            "baba_word": [
+                [
+                    1,
+                    8
+                ]
+            ],
+            "empty": [
+                [
+                    1,
+                    7
+                ],
+                [
+                    1,
+                    6
+                ],
+                [
+                    1,
+                    5
+                ],
+                [
+                    1,
+                    4
+                ],
+                [
+                    1,
+                    3
+                ],
+                [
+                    1,
+                    2
+                ],
+                [
+                    1,
+                    1
+                ],
+                [
+                    2,
+                    7
+                ],
+                [
+                    2,
+                    6
+                ],
+                [
+                    2,
+                    5
+                ],
+                [
+                    2,
+                    4
+                ],
+                [
+                    2,
+                    3
+                ],
+                [
+                    2,
+                    2
+                ],
+                [
+                    2,
+                    1
+                ],
+                [
+                    3,
+                    7
+                ],
+                [
+                    3,
+                    6
+                ],
+                [
+                    3,
+                    5
+                ],
+                [
+                    3,
+                    4
+                ],
+                [
+                    3,
+                    3
+                ],
+                [
+                    3,
+                    2
+                ],
+                [
+                    3,
+                    1
+                ],
+                [
+                    4,
+                    8
+                ],
+                [
+                    4,
+                    7
+                ],
+                [
+                    4,
+                    6
+                ],
+                [
+                    4,
+                    5
+                ],
+                [
+                    4,
+                    4
+                ],
+                [
+                    4,
+                    3
+                ],
+                [
+                    4,
+                    2
+                ],
+                [
+                    4,
+                    1
+                ],
+                [
+                    5,
+                    8
+                ],
+                [
+                    5,
+                    7
+                ],
+                [
+                    5,
+                    6
+                ],
+                [
+                    5,
+                    5
+                ],
+                [
+                    5,
+                    4
+                ],
+                [
+                    5,
+                    3
+                ],
+                [
+                    5,
+                    2
+                ],
+                [
+                    5,
+                    1
+                ],
+                [
+                    6,
+                    7
+                ],
+                [
+                    6,
+                    6
+                ],
+                [
+                    6,
+                    5
+                ],
+                [
+                    6,
+                    4
+                ],
+                [
+                    6,
+                    3
+                ],
+                [
+                    6,
+                    2
+                ],
+                [
+                    6,
+                    1
+                ],
+                [
+                    7,
+                    7
+                ],
+                [
+                    7,
+                    6
+                ],
+                [
+                    7,
+                    5
+                ],
+                [
+                    7,
+                    3
+                ],
+                [
+                    7,
+                    2
+                ],
+                [
+                    7,
+                    1
+                ],
+                [
+                    8,
+                    7
+                ],
+                [
+                    8,
+                    6
+                ],
+                [
+                    8,
+                    5
+                ],
+                [
+                    8,
+                    4
+                ],
+                [
+                    8,
+                    3
+                ],
+                [
+                    8,
+                    2
+                ],
+                [
+                    8,
+                    1
+                ]
+            ],
+            "is_word": [
+                [
+                    2,
+                    8
+                ],
+                [
+                    7,
+                    8
+                ]
+            ],
+            "you_word": [
+                [
+                    3,
+                    8
+                ]
+            ],
+            "flag_word": [
+                [
+                    6,
+                    8
+                ]
+            ],
+            "baba_obj": [
+                [
+                    7,
+                    4
+                ]
+            ],
+            "win_word": [
+                [
+                    8,
+                    8
+                ]
+            ],
+            "won": true,
+            "lost": false
+        },
+        "world_model": {
+            "('border', 'baba_word')": "class BorderBabaWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BorderBabaWordInteractionRule('border', 'baba_word'))",
+            "('border', 'empty')": "class BorderEmptyInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BorderEmptyInteractionRule('border', 'empty'))",
+            "('border', 'is_word')": "class BorderIsWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BorderIsWordInteractionRule('border', 'is_word'))",
+            "('border', 'baba_obj')": "class BorderBabaObjInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BorderBabaObjInteractionRule('border', 'baba_obj'))",
+            "('border', 'you_word')": "class BorderYouWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BorderYouWordInteractionRule('border', 'you_word'))",
+            "('border', 'flag_word')": "class BorderFlagWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BorderFlagWordInteractionRule('border', 'flag_word'))",
+            "('border', 'flag_obj')": "class BorderFlagObjInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BorderFlagObjInteractionRule('border', 'flag_obj'))",
+            "('border', 'win_word')": "class BorderWinWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BorderWinWordInteractionRule('border', 'win_word'))",
+            "('border', 'won')": "class BorderWonInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BorderWonInteractionRule('border', 'won'))",
+            "('border', 'lost')": "class BorderLostInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BorderLostInteractionRule('border', 'lost'))",
+            "('baba_word', 'empty')": "class BabaWordEmptyInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BabaWordEmptyInteractionRule('baba_word', 'empty'))",
+            "('baba_word', 'is_word')": "class BabaWordIsWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BabaWordIsWordInteractionRule('baba_word', 'is_word'))",
+            "('baba_word', 'baba_obj')": "class BabaWordBabaObjInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        from itertools import product\n        from copy import deepcopy\n        new_state = deepcopy(state)\n        for coord1, coord2 in product(state[self.entity_key1], state[self.entity_key2]):\n            updates = push(new_state, action, {'name': self.entity_key1, 'coord': coord1}, {'name': self.entity_key2, 'coord': coord2})\n            for key, val in updates.items():\n                new_state[key] = val\n        return new_state\n\ninteraction_rules.append(BabaWordBabaObjInteractionRule('baba_word', 'baba_obj'))",
+            "('baba_word', 'you_word')": "class BabaWordYouWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BabaWordYouWordInteractionRule('baba_word', 'you_word'))",
+            "('baba_word', 'flag_word')": "class BabaWordFlagWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BabaWordFlagWordInteractionRule('baba_word', 'flag_word'))",
+            "('baba_word', 'flag_obj')": "class BabaWordFlagObjInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BabaWordFlagObjInteractionRule('baba_word', 'flag_obj'))",
+            "('baba_word', 'win_word')": "class BabaWordWinWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BabaWordWinWordInteractionRule('baba_word', 'win_word'))",
+            "('baba_word', 'won')": "class BabaWordWonInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BabaWordWonInteractionRule('baba_word', 'won'))",
+            "('baba_word', 'lost')": "class BabaWordLostInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BabaWordLostInteractionRule('baba_word', 'lost'))",
+            "('empty', 'is_word')": "class EmptyIsWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(EmptyIsWordInteractionRule('empty', 'is_word'))",
+            "('empty', 'baba_obj')": "class EmptyBabaObjInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        from itertools import product\n        from copy import deepcopy\n        from predicates import is_adjacent, is_unoccupied\n        new_empty = deepcopy(state[self.entity_key1])\n        new_baba_obj = deepcopy(state[self.entity_key2])\n        delta = get_delta(action)\n        for coord in state[self.entity_key2]:\n            target_coord = (coord[0] + delta[0], coord[1] + delta[1])\n            if is_unoccupied(state, target_coord):\n                new_baba_obj.remove(coord)\n                new_baba_obj.append(target_coord)\n                new_empty.remove(target_coord)\n        return {self.entity_key1: new_empty, self.entity_key2: new_baba_obj}\n\ninteraction_rules.append(EmptyBabaObjInteractionRule('empty', 'baba_obj'))",
+            "('empty', 'you_word')": "class EmptyYouWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(EmptyYouWordInteractionRule('empty', 'you_word'))",
+            "('empty', 'flag_word')": "class EmptyFlagWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(EmptyFlagWordInteractionRule('empty', 'flag_word'))",
+            "('empty', 'flag_obj')": "class EmptyFlagObjInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(EmptyFlagObjInteractionRule('empty', 'flag_obj'))",
+            "('empty', 'win_word')": "class EmptyWinWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(EmptyWinWordInteractionRule('empty', 'win_word'))",
+            "('empty', 'won')": "class EmptyWonInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(EmptyWonInteractionRule('empty', 'won'))",
+            "('empty', 'lost')": "class EmptyLostInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(EmptyLostInteractionRule('empty', 'lost'))",
+            "('is_word', 'baba_obj')": "class IsWordBabaObjInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        from itertools import product\n        from copy import deepcopy\n        new_state = deepcopy(state)\n        for coord1, coord2 in product(state[self.entity_key1], state[self.entity_key2]):\n            updates = push(new_state, action, {'name': self.entity_key1, 'coord': coord1}, {'name': self.entity_key2, 'coord': coord2})\n            for key, val in updates.items():\n                new_state[key] = val\n        return new_state\n\ninteraction_rules.append(IsWordBabaObjInteractionRule('is_word', 'baba_obj'))",
+            "('is_word', 'you_word')": "class IsWordYouWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(IsWordYouWordInteractionRule('is_word', 'you_word'))",
+            "('is_word', 'flag_word')": "class IsWordFlagWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(IsWordFlagWordInteractionRule('is_word', 'flag_word'))",
+            "('is_word', 'flag_obj')": "class IsWordFlagObjInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(IsWordFlagObjInteractionRule('is_word', 'flag_obj'))",
+            "('is_word', 'win_word')": "class IsWordWinWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(IsWordWinWordInteractionRule('is_word', 'win_word'))",
+            "('is_word', 'won')": "class IsWordWonInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(IsWordWonInteractionRule('is_word', 'won'))",
+            "('is_word', 'lost')": "class IsWordLostInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(IsWordLostInteractionRule('is_word', 'lost'))",
+            "('baba_obj', 'you_word')": "class BabaObjYouWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        from itertools import product\n        from copy import deepcopy\n        new_state = deepcopy(state)\n        for coord1, coord2 in product(state[self.entity_key1], state[self.entity_key2]):\n            updates = push(new_state, action, {'name': self.entity_key1, 'coord': coord1}, {'name': self.entity_key2, 'coord': coord2})\n            for key, val in updates.items():\n                new_state[key] = val\n        return new_state\n\ninteraction_rules.append(BabaObjYouWordInteractionRule('baba_obj', 'you_word'))",
+            "('baba_obj', 'flag_word')": "class BabaObjFlagWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        from itertools import product\n        from copy import deepcopy\n        new_state = deepcopy(state)\n        for coord1, coord2 in product(state[self.entity_key1], state[self.entity_key2]):\n            updates = push(new_state, action, {'name': self.entity_key1, 'coord': coord1}, {'name': self.entity_key2, 'coord': coord2})\n            for key, val in updates.items():\n                new_state[key] = val\n        return new_state\n\ninteraction_rules.append(BabaObjFlagWordInteractionRule('baba_obj', 'flag_word'))",
+            "('baba_obj', 'flag_obj')": "class BabaObjFlagObjInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        from itertools import product\n        from copy import deepcopy\n        from predicates import check_rule, is_unoccupied\n        new_state = deepcopy(state)\n        flag_is_win = check_rule(state, ['flag_word', 'is_word', 'win_word'])\n        for coord1, coord2 in product(state[self.entity_key1], state[self.entity_key2]):\n            if flag_is_win:\n                delta = get_delta(action)\n                new_coord1 = (coord1[0] + delta[0], coord1[1] + delta[1])\n                new_state['baba_obj'].remove(coord1)\n                new_state['baba_obj'].append(new_coord1)\n            else:\n                updates = push(new_state, action, {'name': self.entity_key1, 'coord': coord1}, {'name': self.entity_key2, 'coord': coord2})\n                for key, val in updates.items():\n                    new_state[key] = val\n        return new_state\n\ninteraction_rules.append(BabaObjFlagObjInteractionRule('baba_obj', 'flag_obj'))",
+            "('baba_obj', 'win_word')": "class BabaObjWinWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        from itertools import product\n        from copy import deepcopy\n        new_state = deepcopy(state)\n        for coord1, coord2 in product(state[self.entity_key1], state[self.entity_key2]):\n            updates = push(new_state, action, {'name': self.entity_key1, 'coord': coord1}, {'name': self.entity_key2, 'coord': coord2})\n            for key, val in updates.items():\n                new_state[key] = val\n        return new_state\n\ninteraction_rules.append(BabaObjWinWordInteractionRule('baba_obj', 'win_word'))",
+            "('baba_obj', 'won')": "class BabaObjWonInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BabaObjWonInteractionRule('baba_obj', 'won'))",
+            "('baba_obj', 'lost')": "class BabaObjLostInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(BabaObjLostInteractionRule('baba_obj', 'lost'))",
+            "('you_word', 'flag_word')": "class YouWordFlagWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(YouWordFlagWordInteractionRule('you_word', 'flag_word'))",
+            "('you_word', 'flag_obj')": "class YouWordFlagObjInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(YouWordFlagObjInteractionRule('you_word', 'flag_obj'))",
+            "('you_word', 'win_word')": "class YouWordWinWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(YouWordWinWordInteractionRule('you_word', 'win_word'))",
+            "('you_word', 'won')": "class YouWordWonInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(YouWordWonInteractionRule('you_word', 'won'))",
+            "('you_word', 'lost')": "class YouWordLostInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(YouWordLostInteractionRule('you_word', 'lost'))",
+            "('flag_word', 'flag_obj')": "class FlagWordFlagObjInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(FlagWordFlagObjInteractionRule('flag_word', 'flag_obj'))",
+            "('flag_word', 'win_word')": "class FlagWordWinWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(FlagWordWinWordInteractionRule('flag_word', 'win_word'))",
+            "('flag_word', 'won')": "class FlagWordWonInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(FlagWordWonInteractionRule('flag_word', 'won'))",
+            "('flag_word', 'lost')": "class FlagWordLostInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(FlagWordLostInteractionRule('flag_word', 'lost'))",
+            "('flag_obj', 'win_word')": "class FlagObjWinWordInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(FlagObjWinWordInteractionRule('flag_obj', 'win_word'))",
+            "('flag_obj', 'won')": "class FlagObjWonInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(FlagObjWonInteractionRule('flag_obj', 'won'))",
+            "('flag_obj', 'lost')": "class FlagObjLostInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(FlagObjLostInteractionRule('flag_obj', 'lost'))",
+            "('win_word', 'won')": "class WinWordWonInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(WinWordWonInteractionRule('win_word', 'won'))",
+            "('win_word', 'lost')": "class WinWordLostInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(WinWordLostInteractionRule('win_word', 'lost'))",
+            "('won', 'lost')": "class WonLostInteractionRule(BaseInteractionRule):\n\n    def forward(self, state, action):\n        return {self.entity_key1: state[self.entity_key1], self.entity_key2: state[self.entity_key2]}\n\ninteraction_rules.append(WonLostInteractionRule('won', 'lost'))",
+            "('baba_obj', 'is_word')": "class BabaObjIsWordInteractionRule(BaseInteractionRule):\n    pass\n\ninteraction_rules.append(BabaObjIsWordInteractionRule('baba_obj', 'is_word'))\n",
+            "('you_word', 'baba_obj')": "class YouWordBabaObjInteractionRule(BaseInteractionRule):\n    pass\n\ninteraction_rules.append(YouWordBabaObjInteractionRule('you_word', 'baba_obj'))\n",
+            "('flag_word', 'baba_obj')": "class FlagWordBabaObjInteractionRule(BaseInteractionRule):\n    pass\n\ninteraction_rules.append(FlagWordBabaObjInteractionRule('flag_word', 'baba_obj'))\n"
+        },
+        "exit_condition": "won"
+    }
+]
