@@ -18,6 +18,8 @@ import random
 import re
 from games import LavaGrid, BabaIsYou
 import ast
+import inspect
+
 
 
 main_prompt = \
@@ -176,6 +178,18 @@ def extract_function_definitions(file_content):
     functions = function_pattern.findall(file_content)
     return functions
 
+def load_and_extract_base_class(file_path, class_name):
+    with open(file_path, 'r') as file:
+        file_contents = file.read()
+    
+    # Regular expression to extract the class definition
+    class_pattern = rf'class {class_name}\b[\s\S]*?(?=^class |\Z)'
+    match = re.search(class_pattern, file_contents, re.MULTILINE)
+    
+    if match:
+        return match.group(0)
+    else:
+        raise ValueError(f"Class {class_name} not found in {file_path}")
 
 class TBRLAgent:
     """
@@ -538,21 +552,29 @@ class TBRLAgent:
                 self.replay_buffers[(c1, c2)] = []
 
     def _update_world_model(self, text, rule_keys, save_to_file=True):
+        print("WORLD MODEL UPDATE STARTED")
         x = re.findall(r'```python([\s\S]*?)```', text)
         if not len(x):
             return 'Exception: No code found'
         x = '\n'.join([xi.strip() for xi in x])
+        print("Code to be executed:\n", x)
+
         if x:
             interaction_rules = []  # Gets appended to in LLM-generated code
             try:
                 exec(x, globals(), my_locals := {})
+                print("Executed locals:", my_locals)  # Debug print to see what's inside my_locals after exec
+
             except Exception as e:
+                print("THERE WAS AN EXCEPTION THAT FAILED WORLD MODEL")
                 return e
             else:
                 if not 'interaction_rules' in my_locals:
+                    print("WHERE ARE INTERACTION RULES LIN LOCAL")
                     return 'Exception: Could not find interaction_rules'
                 interaction_rules = my_locals['interaction_rules']
                 if len(interaction_rules):
+                    print("INTERACTION RULES HAS LENGTH")
                     err_msg = ''
                     for rule in interaction_rules:
                         key = (rule.entity_key1, rule.entity_key2)
@@ -563,11 +585,15 @@ class TBRLAgent:
                             self.runtime_vars['interaction_rules_str'][key] = s
                         else:
                             err_msg += f'Exception: Could not find {key} in rule_keys.\n'
+                            print("COULD NOT FIND KEYS!!!!")
+                    print("SAVING INTERACTION RULES NOW")
                     self._save_interaction_rules_to_file()
                     return None if not err_msg else err_msg
                 else:
+                    print('Exception: Could not find any interaction rules')
                     return 'Exception: Could not find any interaction rules'
         else:
+            print('Exception: No code found inside Python tags.')
             return 'Exception: No code found inside Python tags.'
 
     def _do_revise_model(self, error_count):
@@ -638,7 +664,6 @@ class TBRLAgent:
             # Prompt for subset of interaction rules
             relevant_rules = self._get_relevant_rules(obs)
             for key in self.replay_buffers.keys():
-                print("KEY UPDATE FOR REPLAY", key)
                 if key in relevant_rules:
                     self.replay_buffers[key].append(obs)
         else:
@@ -657,59 +682,13 @@ class TBRLAgent:
             f"Your prediction errors:\n{errors}\n"
         )
 
-    # def _choose_synthesis_examples(self, rule_key):
-    #     """
-    #     Choose (s0, a) --> s1 transitions from replay buffer as program
-    #     synthesis examples.
-
-    #     TODO: Make this fancier (e.g. choose most important examples somehow)
-    #     """
-    #     # Simple solution: Just take last k from buffer
-    #     obs = self.replay_buffers[rule_key][::-1][:self.observation_memory_size]
-    #     preds = [self._call_model_debug(rule_key, s0, a) for (s0, a, s1) in obs]
-    #     print("THESE ARE PREDS", preds)
-    #     errors = [self._get_pred_errors(rule_key, s1, pred) for (s0, a, s1), pred in zip(obs, preds)]
-    #     examples = [self._make_observation_summaries(rule_key, x, e) for x, e in zip(obs, errors)]
-    #     error_count = sum([1 if e else 0 for e in errors])
-    #     return examples, error_count
-
     def _choose_synthesis_examples(self, rule_key):
-          # Create new stubs if new entities observed
-        # self._generate_rule_stubs()
-        # breakpoint()
-        print(rule_key)
-        # print(f"Replay buffers keys: {list(self.replay_buffers.keys())}")
-        # print(f"Attempting to access key: {rule_key}")
-
-        # Check if rule_key exists in replay_buffers before accessing it
-        if rule_key not in self.replay_buffers:
-            raise KeyError(f"Key {rule_key} not found in replay_buffers. Available keys: {list(self.replay_buffers.keys())}")
-
-        
         obs = self.replay_buffers[rule_key][::-1][:self.observation_memory_size]
-
-        print(obs)
-
         preds = [self._call_model_debug(rule_key, s0, a) for (s0, a, s1) in obs]
-
-        print("THESE ARE MY PREDS")
-        print(preds)
-
-        # Handle None values in preds
-        # valid_obs_preds = [(o, p) for o, p in zip(obs, preds) if p is not None]
-        # if not valid_obs_preds:
-        #     return [], 0
-
-        # obs, preds = zip(*valid_obs_preds)
-        # print("THESE ARE MY EXAMPLE AND ERROR COUNTS")
         errors = [self._get_pred_errors(rule_key, s1, pred) for (s0, a, s1), pred in zip(obs, preds)]
         examples = [self._make_observation_summaries(rule_key, x, e) for x, e in zip(obs, errors)]
-        # print(examples)
         error_count = sum([1 if e else 0 for e in errors])
-        # print(error_count)
         return examples, error_count
-
-
 
     def _revise_world_model(self):
         """
@@ -721,12 +700,12 @@ class TBRLAgent:
         
         print("ENTER REVISE MODEL")
 
-        self.tape[-1]['revision_prompts'] = {}
-        self.tape[-1]['revision_responses'] = {}
-        
-        # Create new stubs if new entities observed
-        # self._generate_rule_stubs()
+        # self.tape[-1]['revision_prompts'] = {}
+        # self.tape[-1]['revision_responses'] = {}
 
+         # Load and extract the base class definition from _model_tmp.py
+        base_class_code = load_and_extract_base_class('_model_tmp.py', 'BaseInteractionRule')
+        
         for key, rule in self.runtime_vars['interaction_rules'].items():
             print(key)
             examples, error_count = self._choose_synthesis_examples(key)
@@ -746,7 +725,16 @@ class TBRLAgent:
                     }
                 )
                 resp = self.query_lm(prompt)
-                self.runtime_vars['error_msg_model'] = self._update_world_model(resp, [key])
+
+                # Prepend the base class definition and interaction_rules initialization to the response
+                resp_with_base_class = f"```python\n{base_class_code}\n\ninteraction_rules = []\n{resp}\n```"
+                resp_with_base_class = resp_with_base_class.replace('\n```python', '\n```\n```python')
+
+                self.world_model_save_name = '_model_tmp_revised'
+                print("REVISED NAME:", self.world_model_save_name)
+                print("THIS IS THE KEY TO BE REVISED:", [key])
+                # self._update_world_model(resp, [key])  
+                self._update_world_model(resp_with_base_class, [key])
                 self.tape[-1]['revision_prompts'][str(key)] = prompt.to_messages()[0].content
                 self.tape[-1]['revision_responses'][str(key)] = resp
                 print(prompt.to_messages()[0].content)
@@ -964,9 +952,20 @@ class TBRLAgent:
         # Combine import statements and rules
         rules = import_statements + '\n\n' + rules
 
+        # Print debug information
+        print("IMPORT STATEMENTS DEBUG IN SAVE FILE:")
+        print(import_statements)
+        print("RULES FOR DEBUGGING IN SAVE FILE:")
+        print(rules)
+
+        # Determine the file name to save the rules
+        file_name = self.world_model_save_name + '.py'
+        print(f"SAVING RULES TO FILE: {file_name}")
+
         # Write rules to file
-        with Path(self.world_model_save_name + '.py').open('w') as fid:
+        with Path(file_name).open('w') as fid:
             fid.write(rules)
+
 
     def reset(self, keep_model=True):
         self.engine.reset()
@@ -987,6 +986,10 @@ class TBRLAgent:
     def run(self, engine, max_iters=1):
         self.engine = engine
         self.reset(keep_model=False)
+
+        if self.do_revise_model:
+            self.tape[-1]['revision_prompts'] = {}
+            self.tape[-1]['revision_responses'] = {}
 
         for i in range(max_iters):
             print("TOTAL ITERATION:", i)
