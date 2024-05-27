@@ -96,6 +96,9 @@ infer_interaction_rule_prompt = main_prompt + \
 INTERACTION RULE:
 {interaction_rule}
 
+UTILS (Utility functions for import in interaction rule):
+{utils}
+
 OBSERVATIONS:
 {observations}
 
@@ -141,6 +144,7 @@ IMPORTANT NOTES:
 --Use the *absolute minimum* number of operators that you possibly can!! If your plan only needs one or two operators total, that's fine!
 --Make sure to pay attention to the docstrings of the operators to see exactly how to use them! In particular make sure to get the coordinates
 correct when using the form_rule operator.
+--The initial state variable is named "state" make sure to use that variable name for operator1's args
 """
 
 """
@@ -232,6 +236,7 @@ class TBRLAgent:
             'goal_state_str': '',
             'operators': '',
             'predicates': '',
+            'utils': '',
         }
 
         # Ablations
@@ -259,6 +264,7 @@ class TBRLAgent:
         self.predicates_load_name = predicates_load_name
         self.plan_save_name = '_plan_tmp'
         self.actions_set_save_name = '_actions_set_tmp'
+        self.utils_load_name = 'utils'
 
         # Set up chat model
         self.language_model = language_model
@@ -504,6 +510,7 @@ class TBRLAgent:
                         'interaction_rules': '',  # TODO: Insert other rules into context?
                         'interaction_rule': self.runtime_vars['interaction_rules_str'][rule_key],
                         'observations': 'IGNORE',
+                        'utils': self.runtime_vars['utils'],
                         'state': state,
                         'action': action,
                         'error': e,
@@ -722,6 +729,7 @@ class TBRLAgent:
                         'observations': '\n\n'.join(examples),
                         'operators': self.runtime_vars['operators'].replace('{', '{{').replace('}', '}}'),
                         'predicates': self.runtime_vars['predicates'].replace('{', '{{').replace('}', '}}'),
+                        'utils': self.runtime_vars['utils'],
                     }
                 )
                 resp = self.query_lm(prompt)
@@ -899,6 +907,9 @@ class TBRLAgent:
 
             # FIXME: Grab any auxiliary functions defined inside model file and make sure they're saved to tmp file as well
 
+        if self.utils_load_name:
+            with Path(self.utils_load_name + '.py').open('r') as fid:
+                self.runtime_vars['utils'] = fid.read()
 
         if operators_load_name:
             with Path(operators_load_name + '.py').open('r') as fid:
@@ -952,11 +963,11 @@ class TBRLAgent:
         # Combine import statements and rules
         rules = import_statements + '\n\n' + rules
 
-        # Print debug information
-        print("IMPORT STATEMENTS DEBUG IN SAVE FILE:")
-        print(import_statements)
-        print("RULES FOR DEBUGGING IN SAVE FILE:")
-        print(rules)
+        # # Print debug information
+        # print("IMPORT STATEMENTS DEBUG IN SAVE FILE:")
+        # print(import_statements)
+        # print("RULES FOR DEBUGGING IN SAVE FILE:")
+        # print(rules)
 
         # Determine the file name to save the rules
         file_name = self.world_model_save_name + '.py'
