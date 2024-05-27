@@ -51,6 +51,24 @@ def push_to(state, patient_name, token_idx, goal_coord):
     return actions, new_state
 
 def form_rule(state, rule_words, start_coord, orientation):
+     """
+    You can form rules with this operator. It will take the starting coordinate
+    as the final place where the rule_words will begin from and go either horizontally or vertically.
+    Try to notice if any of the words from rule_words are already close and if they are try to think
+    of a start_coord and orientation that allows you to form the rule with the least number of push_to actions. Also remember
+    if some of the rules are at the boundaries/corners of the map then you can't push them into certain locations.
+
+    Example
+    --------
+    
+    Let's say you want to form the rule "Flag is Win" from [flag_word is_word win_word]
+    Let's say the initial coordinate for these words are as follows: flag_word (4, 3), is_word (7, 1), win_word (8, 1)
+    In this case the easiest way to form the rule "Flag is Win" would be to use the form_rule operator with the start_coord as (6, 1).
+    This because is_word and win_word are already together. So by setting the start_coord as (6, 1) and
+    setting the orientation to horizontal, form_rule would push the flag_word to (6, 1) and easily horizontally form the rule 
+    "Flag is Win"
+ 
+    """
     if check_rule(state, rule_words):
         logger.append({'operator': 'form_rule', 'message': 'Rule already formed'})
         return [], state
