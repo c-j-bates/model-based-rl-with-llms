@@ -1,0 +1,7 @@
+Plan found with cost: 3
+1. (move_word flag_word loc-6-5 loc-6-8)
+2. (form_rule flag_word is_word_2 win_word loc-6-8 loc-7-8 loc-8-8)
+3. (move_to baba_obj loc-2-4 loc-7-4)
+Time: 0.0420511
+Generated: 2209
+Expanded: 3
