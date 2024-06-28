@@ -1,0 +1,20 @@
+Plan found with cost: 16
+1. (move_to baba_obj loc-5-4 loc-1-5)
+2. (push_to baba_obj is_word_1 loc-2-5 loc-3-5 loc-1-5 loc-2-5 horizontal)
+3. (push_to baba_obj win_word loc-2-4 loc-2-5 loc-2-5 loc-2-4 vertical)
+4. (push_to baba_obj win_word loc-2-5 loc-2-6 loc-2-4 loc-2-5 vertical)
+5. (move_to baba_obj loc-2-5 loc-3-4)
+6. (push_to baba_obj is_word_1 loc-3-5 loc-3-6 loc-3-4 loc-3-5 vertical)
+7. (push_to baba_obj is_word_1 loc-3-6 loc-3-7 loc-3-5 loc-3-6 vertical)
+8. (push_to baba_obj win_word loc-2-6 loc-3-6 loc-3-6 loc-2-6 horizontal)
+9. (push_to baba_obj win_word loc-3-6 loc-4-6 loc-2-6 loc-3-6 horizontal)
+10. (push_to baba_obj win_word loc-4-6 loc-5-6 loc-3-6 loc-4-6 horizontal)
+11. (form_rule win_word is_word_2 win_word loc-5-6 loc-5-7 loc-5-6 vertical)
+12. (push_to baba_obj baba_word loc-4-7 loc-4-6 loc-4-6 loc-4-7 vertical)
+13. (push_to baba_obj is_word_1 loc-3-7 loc-4-7 loc-4-7 loc-3-7 horizontal)
+14. (move_to baba_obj loc-3-7 loc-6-6)
+15. (push_to baba_obj win_word loc-5-6 loc-4-6 loc-6-6 loc-3-6 horizontal)
+16. (form_rule baba_word is_word_1 win_word loc-4-6 loc-4-7 loc-4-6 vertical)
+Time: 159.382
+Generated: 17030
+Expanded: 178
