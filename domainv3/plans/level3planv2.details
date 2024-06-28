@@ -1,0 +1,11 @@
+Plan found with cost: 7
+1. (move_to baba_obj loc-5-4 loc-4-8)
+2. (push_to baba_obj baba_word loc-4-7 loc-4-6 loc-4-8 loc-4-7 vertical)
+3. (push_to baba_obj is_word_2 loc-5-7 loc-4-7 loc-4-7 loc-3-7 horizontal)
+4. (move_to baba_obj loc-3-7 loc-5-6)
+5. (push_to baba_obj baba_word loc-4-6 loc-3-6 loc-5-6 loc-4-6 horizontal)
+6. (push_to baba_obj baba_word loc-3-6 loc-2-6 loc-4-6 loc-1-6 horizontal)
+7. (form_rule baba_word is_word_1 win_word loc-2-6 loc-2-5 loc-2-4 vertical)
+Time: 0.0642151
+Generated: 2148
+Expanded: 1049
