@@ -1,0 +1,5 @@
+Plan found with cost: 1
+1. (form_rule flag_word loc-6-5 loc-6-8 is_word_2 loc-7-8 loc-7-8 win_word loc-8-8 loc-8-8 horizontal)
+Time: 0.000391006
+Generated: 95
+Expanded: 1
