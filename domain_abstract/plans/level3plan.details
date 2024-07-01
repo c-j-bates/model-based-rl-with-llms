@@ -1,0 +1,5 @@
+Plan found with cost: 1
+1. (form_rule baba_word loc-4-7 loc-2-6 is_word_1 loc-2-5 loc-2-5 win_word loc-2-4 loc-2-4 vertical)
+Time: 6.40154e-05
+Generated: 88
+Expanded: 1
