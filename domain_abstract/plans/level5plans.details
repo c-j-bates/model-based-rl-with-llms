@@ -1,0 +1,6 @@
+Plan found with cost: 2
+1. (form_rule rock_word loc-4-3 loc-6-1 is_word_3 loc-7-1 loc-7-1 flag_word_2 loc-8-1 loc-8-1 horizontal)
+2. (move_to baba_obj loc-2-5 loc-7-5)
+Time: 0.000859976
+Generated: 199
+Expanded: 2
