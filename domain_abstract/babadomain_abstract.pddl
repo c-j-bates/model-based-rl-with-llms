@@ -12,13 +12,13 @@
         (valid_rule ?word1 - word ?word2 - word ?word3 - word)
     )
 
-  (:action move_to
+    (:action move_to
         :parameters (?obj - object ?from - location ?to - location)
         :precondition (and
             (at ?obj ?from)
             (not (at ?obj ?to))
             (is-controllable ?obj)    
-            (or (unoccupied ?to) (at flag_obj ?to))
+            ; (or (unoccupied ?to) (at flag_obj ?to))
         )
         :effect (and
             (not (at ?obj ?from))
@@ -30,54 +30,51 @@
         )
     )
 
-(:action form_rule
-    :parameters (?word1 - word ?from1 - location ?to1 - location 
-                 ?word2 - word ?from2 - location ?to2 - location 
-                 ?word3 - word ?from3 - location ?to3 - location 
-                 ?orientation - orientation)
-    :precondition (and
-        (or
-            ; One word moves
-            (and (at ?word1 ?from1) (at ?word2 ?to2) (= ?to2 ?from2) (at ?word3 ?to3) (= ?to3 ?from3))
-            (and (at ?word1 ?to1) (= ?to1 ?from1) (at ?word2 ?from2) (at ?word3 ?to3) (= ?to3 ?from3))
-            (and (at ?word1 ?to1) (= ?to1 ?from1) (at ?word2 ?to2) (= ?to2 ?from2) (at ?word3 ?from3))
+    (:action form_rule
+        :parameters (?word1 - word ?from1 - location ?to1 - location 
+                     ?word2 - word ?from2 - location ?to2 - location 
+                     ?word3 - word ?from3 - location ?to3 - location 
+                     ?orientation - orientation)
+        :precondition (and
+            (valid_rule ?word1 ?word2 ?word3)
+            (not (rule_formed ?word1 ?word2 ?word3))
+            (or
+                (and (at ?word1 ?from1) (at ?word2 ?to2) (= ?to2 ?from2) (at ?word3 ?to3) (= ?to3 ?from3))
+                (and (at ?word1 ?to1) (= ?to1 ?from1) (at ?word2 ?from2) (at ?word3 ?to3) (= ?to3 ?from3))
+                (and (at ?word1 ?to1) (= ?to1 ?from1) (at ?word2 ?to2) (= ?to2 ?from2) (at ?word3 ?from3))
+            )
+            (or 
+                (and (at ?word1 ?from1) (at ?word2 ?from2) (at ?word3 ?to3) (= ?to3 ?from3))
+                (and (at ?word1 ?from1) (at ?word2 ?to2) (= ?to2 ?from2) (at ?word3 ?from3))
+                (and (at ?word1 ?to1) (= ?to1 ?from1) (at ?word2 ?from2) (at ?word3 ?from3))
+            )
+
+            (or 
+            (and (at ?word1 ?from1) (at ?word2 ?from2) (at ?word3 ?from3))
+            
+            )
+            (not (= ?to1 ?to2))
+            (not (= ?to2 ?to3))
+            (not (= ?to3 ?to1))
+            (adjacent ?to1 ?to2 ?orientation)
+            (adjacent ?to2 ?to3 ?orientation)
+            
+                )
+        :effect (and
+
+            (at ?word1 ?to1)
+            (at ?word2 ?to2)
+            (at ?word3 ?to3)
+            (unoccupied ?from1)
+            (unoccupied ?from2)
+            (unoccupied ?from3)
+            (not (unoccupied ?to1))
+            (not (unoccupied ?to2))
+            (not (unoccupied ?to3))
+            (rule_formed ?word1 ?word2 ?word3)
         )
-        (or
-          ; Two words move
-            (and (at ?word1 ?from1) (at ?word2 ?from2) (at ?word3 ?to3) (= ?to3 ?from3))
-            (and (at ?word1 ?from1) (at ?word2 ?to2) (= ?to2 ?from2) (at ?word3 ?from3))
-            (and (at ?word1 ?to1) (= ?to1 ?from1) (at ?word2 ?from2) (at ?word3 ?from3))
-        )
-        (or
-          (and (at ?word1 ?from1) (at ?word2 ?from2) (at ?word3 ?from3))
-        )
-        (adjacent ?to1 ?to2 ?orientation)
-        (adjacent ?to2 ?to3 ?orientation)
-        (valid_rule ?word1 ?word2 ?word3)
-        (not (rule_formed ?word1 ?word2 ?word3))
-    )
-    :effect (and
-        (when (and (not (= ?to1 ?from1)) (not (= ?to2 ?from2)) (not (= ?to3 ?from3)))
-              (and (not (at ?word1 ?from1)) (at ?word1 ?to1)
-                   (not (at ?word2 ?from2)) (at ?word2 ?to2)
-                   (not (at ?word3 ?from3)) (at ?word3 ?to3)))
-        (when (and (not (= ?to1 ?from1)) (not (= ?to2 ?from2)) (= ?to3 ?from3))
-              (and (not (at ?word1 ?from1)) (at ?word1 ?to1)
-                   (not (at ?word2 ?from2)) (at ?word2 ?to2)))
-        (when (and (not (= ?to1 ?from1)) (= ?to2 ?from2) (not (= ?to3 ?from3)))
-              (and (not (at ?word1 ?from1)) (at ?word1 ?to1)
-                   (not (at ?word3 ?from3)) (at ?word3 ?to3)))
-        (when (and (= ?to1 ?from1) (not (= ?to2 ?from2)) (not (= ?to3 ?from3)))
-              (and (not (at ?word2 ?from2)) (at ?word2 ?to2)
-                   (not (at ?word3 ?from3)) (at ?word3 ?to3)))
-        (when (and (not (= ?to1 ?from1)) (= ?to2 ?from2) (= ?to3 ?from3))
-              (and (not (at ?word1 ?from1)) (at ?word1 ?to1)))
-        (when (and (= ?to1 ?from1) (not (= ?to2 ?from2)) (= ?to3 ?from3))
-              (and (not (at ?word2 ?from2)) (at ?word2 ?to2)))
-        (when (and (= ?to1 ?from1) (= ?to2 ?from2) (not (= ?to3 ?from3)))
-              (and (not (at ?word3 ?from3)) (at ?word3 ?to3)))
-        (rule_formed ?word1 ?word2 ?word3)
     )
 )
 
-)
+
+
