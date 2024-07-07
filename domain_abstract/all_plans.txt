@@ -122,4 +122,9 @@ Expanded: 2
 -----------------------------------
 Plan for level14.pddl
 -----------------------------------
-NOT IMPLEMENTED
+Plan found with cost: 2
+1. (form_rule keke_word_1 loc-3-4 loc-3-4 is_word_1 loc-2-2 loc-3-3 you_word_1 loc-3-2 loc-3-2 vertical)
+2. (move_to keke_obj_1 loc-3-7 loc-6-7)
+Time: 0.144264
+Generated: 164
+Expanded: 2
