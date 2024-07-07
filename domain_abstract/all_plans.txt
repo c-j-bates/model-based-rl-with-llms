@@ -107,7 +107,13 @@ Expanded: 2
 -----------------------------------
 Plan for level12.pddl
 -----------------------------------
-NOT IMPLEMENTED
+Plan found with cost: 3
+1. (push_simple rock_obj_1 loc-8-4)
+2. (push_simple rock_obj_2 loc-8-5)
+3. (move_to baba_obj_1 loc-2-6 loc-7-7)
+Time: 0.00669575
+Generated: 939
+Expanded: 3
 
 -----------------------------------
 Plan for level13.pddl
