@@ -55,3 +55,71 @@ Time: 0.00117779
 Generated: 254
 Expanded: 2
 
+-----------------------------------
+Plan for level7.pddl
+-----------------------------------
+Plan found with cost: 2
+1. (push_to baba_obj rock_obj_1 loc-3-5 loc-3-6 vertical)
+2. (move_to baba_obj loc-3-5 loc-7-5)
+Time: 0.00269413
+Generated: 153
+Expanded: 6
+
+-----------------------------------
+Plan for level8.pddl
+-----------------------------------
+Plan found with cost: 1
+1. (move_to baba_obj loc-3-4 loc-5-4)
+Time: 0.000450134
+Generated: 124
+Expanded: 1
+
+-----------------------------------
+Plan for level9.pddl
+-----------------------------------
+Plan found with cost: 2
+1. (break_rule is_word_1 loc-2-4 loc-1-4 horizontal wall_word_1 is_word_1 stop_word_1)
+2. (move_to baba_obj_1 loc-5-4 loc-5-8)
+Time: 0.00446892
+Generated: 237
+Expanded: 2
+
+-----------------------------------
+Plan for level10.pddl
+-----------------------------------
+Plan found with cost: 2
+1. (break_rule is_word_1 loc-2-7 loc-2-6 vertical skull_word_1 is_word_1 kill_word_1)
+2. (move_to baba_obj_1 loc-2-5 loc-6-5)
+Time: 0.002491
+Generated: 238
+Expanded: 2
+
+-----------------------------------
+Plan for level11.pddl
+-----------------------------------
+Plan found with cost: 2
+1. (break_rule is_word_3 loc-7-2 loc-7-1 vertical goop_word_1 is_word_3 sink_word_1)
+2. (move_to baba_obj_1 loc-2-6 loc-7-7)
+Time: 0.00168324
+Generated: 216
+Expanded: 2
+
+-----------------------------------
+Plan for level12.pddl
+-----------------------------------
+NOT IMPLEMENTED
+
+-----------------------------------
+Plan for level13.pddl
+-----------------------------------
+Plan found with cost: 2
+1. (break_rule is_word_3 loc-7-4 loc-6-4 horizontal baba_word_2 is_word_3 melt_word_1)
+2. (move_to baba_obj_1 loc-5-4 loc-4-8)
+Time: 0.00143719
+Generated: 251
+Expanded: 2
+
+-----------------------------------
+Plan for level14.pddl
+-----------------------------------
+NOT IMPLEMENTED
