@@ -1,0 +1,6 @@
+Plan found with cost: 2
+1. (move_to baba flag)
+2. (form_rule rock is flag)
+Time: 0.000523001
+Generated: 430
+Expanded: 2
