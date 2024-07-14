@@ -1,0 +1,5 @@
+Plan found with cost: 1
+1. (move_to flag baba)
+Time: 0.000348002
+Generated: 343
+Expanded: 1
