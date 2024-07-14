@@ -4,14 +4,17 @@
     (:objects
         baba
         flag
+
         is
         you
+        win
     )
 
     (:init
 
         ; Formed rules
-        (rule_formed baba is you)        
+        (rule_formed baba is you)
+        (rule_formed flag is win)        
 
     )
 
