@@ -1,0 +1,6 @@
+Plan found with cost: 2
+1. (form_rule flag is win)
+2. (move_to baba flag)
+Time: 0.000177
+Generated: 250
+Expanded: 2
