@@ -1,5 +1,5 @@
 Plan found with cost: 1
 1. (move_to baba flag)
-Time: 4.7002e-05
-Generated: 128
+Time: 3.49991e-05
+Generated: 5
 Expanded: 1
