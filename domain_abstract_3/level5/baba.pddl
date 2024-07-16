@@ -7,7 +7,7 @@
 
     (:predicates
         (control_rule ?obj_name - object_instance ?word2 - word ?word3 - word)
-        (at ?obj - object_instance ?loc - location)
+        (at ?obj ?loc)
         (overlapping ?obj1 - object_instance ?obj2 - object_instance)
         (rule_formed ?word1 - word ?word2 - word ?word3 - word)
     )
