@@ -1,0 +1,3 @@
+(break_rule rock is rock)
+(move_to baba_obj_1 rock_obj_1)
+; cost = 2 (unit cost)
