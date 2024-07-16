@@ -1,0 +1,5 @@
+Plan found with cost: 1
+1. (form_rule baba is win)
+Time: 0.000154998
+Generated: 175
+Expanded: 1
