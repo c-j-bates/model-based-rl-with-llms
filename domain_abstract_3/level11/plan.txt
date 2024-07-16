@@ -1,0 +1,3 @@
+(break_rule goop is sink)
+(move_to baba_obj_1 flag_obj_1)
+; cost = 2 (unit cost)
