@@ -131,7 +131,9 @@
         (at baba_obj_1 loc-2-4)
         (at flag_obj_1 loc-7-4)
 
+        (rule_formed flag is win)
         (control_rule baba_obj_1 is you) 
+        
         
     )
 
