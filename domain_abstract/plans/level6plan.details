@@ -1,6 +1,0 @@
-Plan found with cost: 2
-1. (push_word_to_break_rule is_word_4 loc-3-3 loc-3-2 vertical rock_word_2 is_word_4 rock_word_3)
-2. (move_to baba_obj loc-2-5 loc-7-5)
-Time: 0.00128794
-Generated: 254
-Expanded: 2
