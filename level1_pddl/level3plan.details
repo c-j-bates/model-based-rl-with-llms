@@ -1,7 +1,0 @@
-Plan found with cost: 3
-1. (move_word is_word_1 loc-2-5 loc-4-6)
-2. (move_word win_word loc-2-4 loc-4-5)
-3. (form_rule baba_word is_word_1 win_word loc-4-7 loc-4-6 loc-4-5)
-Time: 1.30973
-Generated: 4527
-Expanded: 2647
