@@ -50,7 +50,6 @@ function updateMap(ascii_map, action) {
     // Return the updated ASCII map and whether the game is won
     return {
         ascii_map: updatedAsciiMap,
-        state: res,
         won: res.won
     };
 }
@@ -85,15 +84,5 @@ if (move !== 'None') {
     saveJsonToFile(result, resultPath);
 } else {
     // If no move, just save the current ASCII map
-    let result = updateMap(ascii_map, "space");
-
-    // return {
-    //     ascii_map: updatedAsciiMap,
-    //     state: result,
-    //     won: false
-    // };
-
-    // saveJsonToFile({ ascii_map: ascii_map }, resultPath);
-    saveJsonToFile(result, resultPath);
-
+    saveJsonToFile({ ascii_map: ascii_map }, resultPath);
 }
